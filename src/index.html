@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Wars: Visual Studio Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #gameCanvas { display: block; }
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #startButton {
+            font-size: 24px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="startScreen">
+        <h1>Space Wars: Visual Studio Edition</h1>
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <!-- Preload images -->
+    <img id="spaceshipImg" src="../images/spaceship.png" alt="Spaceship" class="hidden">
+    <img id="backgroundImg" src="../images/space5.jpg" alt="Space Background" class="hidden">
+    <img id="asteroidImg" src="../images/asteroid.png" alt="Asteroid" class="hidden">
+
+    <!-- Preload audio -->
+    <audio id="successSound" src="../audio/laser.mp3" preload="auto"></audio>
+    <audio id="collisionSound" src="../audio/bomb.mp3" preload="auto"></audio>
+    <audio id="levelUpSound" src="../audio/levelUp.mp3"></audio>
+<audio id="gameOverSound" src="../audio/gameOver.mp3"></audio>
+<audio id="backgroundMusic" src="../audio/backgroundMusic.wav" loop></audio>
+
+    <script src="game.js"></script>
+</body>
+</html>
