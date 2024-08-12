@@ -41,8 +41,8 @@ const commands = [
     { description: 'Find', shortcut: 'Ctrl+F' },
     { description: 'Replace', shortcut: 'Ctrl+H' },
     { description: 'Go to line', shortcut: 'Ctrl+G' },
-    { description: 'Comment selection', shortcut: 'Ctrl+K,Ctrl+C' },
-    { description: 'Uncomment selection', shortcut: 'Ctrl+K,Ctrl+U' },
+    { description: 'Comment selection', shortcut: 'Ctrl+K+C' },
+    { description: 'Uncomment selection', shortcut: 'Ctrl+K+U' },
     { description: 'Start debugging', shortcut: 'F5' },
     { description: 'Stop debugging', shortcut: 'Shift+F5' },
     { description: 'Step over', shortcut: 'F10' },
@@ -50,19 +50,21 @@ const commands = [
     { description: 'Step out', shortcut: 'Shift+F11' },
     { description: 'Toggle breakpoint', shortcut: 'F9' },
     { description: 'Build solution', shortcut: 'Ctrl+Shift+B' },
-    { description: 'Navigate backward', shortcut: 'Ctrl+-' },
-    { description: 'Navigate forward', shortcut: 'Ctrl+Shift+-' },
+    { description: 'Navigate backward', shortcut: 'Ctrl+Minus' },
+    { description: 'Navigate forward', shortcut: 'Ctrl+Shift+Minus' },
+    { description: 'Rename', shortcut: 'Ctrl+R+R' },
+    { description: 'Toggle fullscreen', shortcut: 'Shift+Alt+Enter' },
+    { description: 'Zoom in', shortcut: 'Ctrl+Shift+Period' },
+    { description: 'Zoom out', shortcut: 'Ctrl+Shift+Comma' },
     { description: 'Go to definition', shortcut: 'F12' },
     { description: 'Find all references', shortcut: 'Shift+F12' },
-    { description: 'Rename', shortcut: 'Ctrl+R,Ctrl+R' },
-    { description: 'Format document', shortcut: 'Ctrl+K,Ctrl+D' },
-    { description: 'Format selection', shortcut: 'Ctrl+K,Ctrl+F' },
-    { description: 'Toggle fullscreen', shortcut: 'Shift+Alt+Enter' },
-    { description: 'Zoom in', shortcut: 'Ctrl+Shift+.' },
-    { description: 'Zoom out', shortcut: 'Ctrl+Shift+,' },
-    { description: 'Collapse all', shortcut: 'Ctrl+M,Ctrl+O' },
-    { description: 'Expand all', shortcut: 'Ctrl+M,Ctrl+P' }
+    { description: 'Format document', shortcut: 'Ctrl+K+D' },
+    { description: 'Format selection', shortcut: 'Ctrl+K+F' },
+
+    { description: 'Collapse all', shortcut: 'Ctrl+M+O' },
+    { description: 'Expand all', shortcut: 'Ctrl+M+P' }
 ];
+
 let level = 1;
 let pointsToNextLevel = 5;
 let availableCommands = [...commands];
@@ -124,7 +126,7 @@ function drawAsteroids() {
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(asteroid.command.description, asteroid.x + asteroid.width / 2, asteroid.y + asteroid.height + 15);
-        // ctx.fillText(asteroid.command.shortcut, asteroid.x + asteroid.width / 2, asteroid.y + asteroid.height + 30);
+        ctx.fillText(asteroid.command.shortcut, asteroid.x + asteroid.width / 2, asteroid.y + asteroid.height + 30);
     });
 }
 
@@ -142,8 +144,11 @@ function updateAsteroids() {
             missedCommands.push(asteroids[i].command);
             asteroids.splice(i, 1);
             health = Math.max(0, health - 1);
-            if (health <= 0) {
+            if (health <= 0 ) {
                 endGame(false);
+            }
+            if (availableCommands.length === 0) {
+                endGame(true);
             }
         }
     }
@@ -173,6 +178,9 @@ function checkCollisions() {
 
             if (health <= 0) {
                 endGame(false);
+            }
+            if (availableCommands.length === 0) {
+                endGame(true);
             }
         }
     }
@@ -313,11 +321,9 @@ function startGame() {
 
 window.addEventListener('keydown', function(e) {
     if(gameActive) {
-        if((e.ctrlKey || e.metaKey) && e.key !== 'F12' || e.key === 'F5') {
-            e.preventDefault();
-        }
+        e.preventDefault();  // Prevent all default behaviors during the game
     }
-}, false);
+}, true);  // Use capturing phase
 
 function levelUp() {
     level++;
@@ -341,28 +347,51 @@ function createHitEffect(x, y) {
     }, 100);
 }
 
-document.addEventListener('keydown', (event) => {
-    if (gameActive) {
-        const pressedShortcut = [];
-        if (event.ctrlKey) pressedShortcut.push('Ctrl');
-        if (event.shiftKey) pressedShortcut.push('Shift');
-        if (event.altKey) pressedShortcut.push('Alt');
-        if (!['Control', 'Shift', 'Alt'].includes(event.key)) {
-            pressedShortcut.push(event.key.toUpperCase());
-        }
+let heldKeys = new Set();
+let lastKeyPressTime = 0;
+const MAX_KEY_INTERVAL = 500; // milliseconds
 
-        const shortcut = pressedShortcut.join('+');
-        const matchingAsteroidIndex = asteroids.findIndex(a => a.command.shortcut === shortcut && !a.targetted);
+function normalizeKey(key) {
+    switch (key) {
+        case 'Control': return 'Ctrl';
+        case 'Alt': return 'Alt';
+        case 'Shift': return 'Shift';
+        case ',': 
+        case '<': return 'Comma';
+        case '.': 
+        case '>': return 'Period';
+        case '-': 
+        case '_': return 'Minus';
+        default: return key.length === 1 ? key.toUpperCase() : key;
+    }
+}
+
+function checkShortcut() {
+    const shortcutArray = Array.from(heldKeys).map(normalizeKey);
+    const shortcut = shortcutArray.sort().join('+');
+
+    console.log('Current held keys:', shortcut); // Debugging line
+
+    const matchingCommand = commands.find(cmd => {
+        const normalizedCmdShortcut = cmd.shortcut.split('+').map(normalizeKey).sort().join('+');
+        return normalizedCmdShortcut === shortcut;
+    });
+
+    if (matchingCommand) {
+        console.log('Matched shortcut:', matchingCommand.shortcut); // Debugging line
+
+        const matchingAsteroidIndex = asteroids.findIndex(a => 
+            a.command.shortcut === matchingCommand.shortcut && !a.targetted
+        );
 
         if (matchingAsteroidIndex !== -1) {
-            event.preventDefault();
             const targetAsteroid = asteroids[matchingAsteroidIndex];
             targetAsteroid.targetted = true;
             
             spaceship.targetX = targetAsteroid.x + targetAsteroid.width / 2 - spaceship.width / 2;
             spaceship.isMoving = true;
 
-            const commandIndex = availableCommands.findIndex(c => c.shortcut === shortcut);
+            const commandIndex = availableCommands.findIndex(c => c.shortcut === matchingCommand.shortcut);
             if (commandIndex !== -1) {
                 availableCommands.splice(commandIndex, 1);
             }
@@ -370,11 +399,42 @@ document.addEventListener('keydown', (event) => {
             if (availableCommands.length === 0) {
                 endGame(true);
             }
+
+            // Reset held keys after successful match
+            heldKeys.clear();
         }
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (gameActive) {
+        event.preventDefault(); // Prevent default browser behavior
+
+        const currentTime = new Date().getTime();
+        if (currentTime - lastKeyPressTime > MAX_KEY_INTERVAL) {
+            heldKeys.clear();
+        }
+        lastKeyPressTime = currentTime;
+
+        const normalizedKey = normalizeKey(event.key);
+        heldKeys.add(normalizedKey);
+
+        checkShortcut();
     } else if (event.code === 'Space') {
         startGame();
     }
 });
+
+document.addEventListener('keyup', (event) => {
+    if (gameActive) {
+        const normalizedKey = normalizeKey(event.key);
+        heldKeys.delete(normalizedKey);
+
+        // For multi-key shortcuts, check on key release as well
+        checkShortcut();
+    }
+});
+
 
 startButton.addEventListener('click', startGame);
 

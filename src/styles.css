@@ -1,0 +1,104 @@
+/* styles.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+#gameCanvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#startScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    max-width: 80%;
+    width: 500px;
+}
+
+#startScreen h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+    }
+    to {
+        text-shadow: 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff;
+    }
+}
+
+#startScreen p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #0ff;
+}
+
+#startButton {
+    font-size: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    background-color: #0ff;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#startButton:hover {
+    background-color: #00cccc;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #0ff;
+}
+
+#startButton:active {
+    transform: scale(0.95);
+}
+
+.instructions {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: rgba(0, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.instructions h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #0ff;
+}
+
+.instructions p {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.hidden {
+    display: none;
+}
