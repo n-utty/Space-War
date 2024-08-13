@@ -13,8 +13,7 @@ const asteroidImg = document.getElementById('asteroidImg');
 const successSound = document.getElementById('successSound');
 const collisionSound = document.getElementById('collisionSound');
 
-
-// Query the new audio elements
+// Query the audio elements
 const levelUpSound = document.getElementById('levelUpSound');
 const gameOverSound = document.getElementById('gameOverSound');
 const backgroundMusic = document.getElementById('backgroundMusic');
@@ -52,7 +51,6 @@ const commands = [
     { description: 'Build solution', shortcut: 'Ctrl+Shift+B' },
     { description: 'Navigate backward', shortcut: 'Ctrl+Minus' },
     { description: 'Navigate forward', shortcut: 'Ctrl+Shift+Minus' },
-    { description: 'Rename', shortcut: 'Ctrl+R+R' },
     { description: 'Toggle fullscreen', shortcut: 'Shift+Alt+Enter' },
     { description: 'Zoom in', shortcut: 'Ctrl+Shift+Period' },
     { description: 'Zoom out', shortcut: 'Ctrl+Shift+Comma' },
@@ -60,7 +58,6 @@ const commands = [
     { description: 'Find all references', shortcut: 'Shift+F12' },
     { description: 'Format document', shortcut: 'Ctrl+K+D' },
     { description: 'Format selection', shortcut: 'Ctrl+K+F' },
-
     { description: 'Collapse all', shortcut: 'Ctrl+M+O' },
     { description: 'Expand all', shortcut: 'Ctrl+M+P' }
 ];
@@ -126,7 +123,7 @@ function drawAsteroids() {
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(asteroid.command.description, asteroid.x + asteroid.width / 2, asteroid.y + asteroid.height + 15);
-        ctx.fillText(asteroid.command.shortcut, asteroid.x + asteroid.width / 2, asteroid.y + asteroid.height + 30);
+        // ctx.fillText(asteroid.command.shortcut, asteroid.x + asteroid.width / 2, asteroid.y + asteroid.height + 30);
     });
 }
 
@@ -234,15 +231,20 @@ function drawHealthBar() {
 }
 
 function drawScore() {
-    ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
+    ctx.fillStyle = '#0ff';
+    ctx.font = '20px Orbitron';
     ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${score}`, 10, 30);
-    ctx.fillText(`Level: ${level}`, 10, 55);
+    ctx.fillText(`Score : ${score}`, 10, 30);
+    ctx.fillText(`Level : ${level}`, 10, 55);
 }
 
 function gameLoop(currentTime) {
-    ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    updateStars();
+    drawStars();
+    drawBorder();
 
     drawSpaceship();
     drawAsteroids();
@@ -306,6 +308,7 @@ function startGame() {
     score = 0;
     health = 5;
     level = 1;
+    createStars(200);
     pointsToNextLevel = 5;
     asteroids.length = 0;
     bullets.length = 0;
@@ -434,8 +437,6 @@ document.addEventListener('keyup', (event) => {
         checkShortcut();
     }
 });
-
-
 startButton.addEventListener('click', startGame);
 
 window.addEventListener('resize', () => {
@@ -444,3 +445,48 @@ window.addEventListener('resize', () => {
     spaceship.x = canvas.width / 2 - spaceship.width / 2;
     spaceship.y = canvas.height - 150;
 });
+
+// Custom styling to canvas 
+const stars = [];
+
+function createStars(count) {
+    for (let i = 0; i < count; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            radius: Math.random() * 1.5,
+            alpha: Math.random()
+        });
+    }
+}
+
+function drawStars() {
+    ctx.save();
+    for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+function updateStars() {
+    for (let star of stars) {
+        star.y += 0.2;
+        if (star.y > canvas.height) {
+            star.y = 0;
+        }
+        star.alpha = Math.random();
+    }
+}
+
+function drawBorder() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, canvas.width, canvas.height, 15);
+    ctx.stroke();
+    ctx.restore();
+}
